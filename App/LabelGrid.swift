@@ -67,6 +67,8 @@ private struct LabelCell: View {
                     .font(.caption.weight(.semibold))
             }
             .foregroundStyle(fill.mostReadable(of: selected ? [Color(white: 0.12), .white] : [Color(hex: label.dark), .white]))
+            // The badge below names the selection, so cells stay quiet until hovered.
+            .opacity(hovering ? 1 : 0)
             .frame(width: 82, height: 38)
             .background(fill.opacity(selected || hovering ? 1 : 0.55), in: .rect(cornerRadius: 9))
             .shadow(color: .black.opacity(selected ? 0.18 : 0), radius: 3, y: 1)
