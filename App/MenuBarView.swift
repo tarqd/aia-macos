@@ -12,16 +12,20 @@ struct MenuBarView: View {
         VStack(alignment: .leading, spacing: 14) {
             header(label: label, snippets: snippets)
 
-            LabelGrid(spec: model.spec, selectedCode: model.selectedCode) { model.selectedCode = $0.code }
-                .frame(maxWidth: .infinity)
+            VStack(spacing: 8) {
+                LabelGrid(spec: model.spec, selectedCode: model.selectedCode) { model.selectedCode = $0.code }
+
+                Text(label.description)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    // Reserve two lines so the layout doesn't jump between labels.
+                    .lineLimit(2, reservesSpace: true)
+                    .padding(.horizontal, 24)
+            }
+            .frame(maxWidth: .infinity)
 
             badgeCard(label: label, snippets: snippets)
-
-            Text(label.description)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(spacing: 8) {
                 Button { model.copy(label, as: .link) } label: {
@@ -90,31 +94,32 @@ struct MenuBarView: View {
     /// The finished badge: click to copy, drag to insert.
     private func badgeCard(label: AIALabel, snippets: Snippets) -> some View {
         let copied = model.justCopied == label.code
-        return Button { model.copy(label, as: .link) } label: {
-            VStack(spacing: 10) {
+        return VStack(spacing: 6) {
+            Button { model.copy(label, as: .link) } label: {
                 BadgePreview(snippets: snippets)
-                Group {
-                    if copied {
-                        Label("Copied HTML + Markdown", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                    } else {
-                        Text("Click to copy  ·  Drag into a document")
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                .font(.caption)
-                .contentTransition(.opacity)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .padding(.horizontal, 12)
+                    .background(.quaternary.opacity(0.6), in: .rect(cornerRadius: 12))
+                    .contentShape(.rect)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .padding(.horizontal, 12)
-            .background(.quaternary.opacity(0.6), in: .rect(cornerRadius: 12))
-            .contentShape(.rect)
+            .buttonStyle(.plain)
+            .focusEffectDisabled()
+            .onDrag { LabelClip.itemProvider(snippets, as: .link) }
+            .accessibilityLabel("Copy \(snippets.heading)")
+
+            Group {
+                if copied {
+                    Label("Copied HTML + Markdown", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                } else {
+                    Text("Click to copy  ·  Drag into a document")
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .font(.caption)
+            .contentTransition(.opacity)
             .animation(.default, value: copied)
         }
-        .buttonStyle(.plain)
-        .focusEffectDisabled()
-        .onDrag { LabelClip.itemProvider(snippets, as: .link) }
-        .accessibilityLabel("Copy \(snippets.heading)")
     }
 }
