@@ -96,7 +96,7 @@ struct QuickPickerView: View {
             }
 
             Text(pendingIdeas == nil
-                 ? "Type ideas 1–3, then words 1–3  ·  ↩ link  ·  ⇧↩ image  ·  ⌥↩ plain text"
+                 ? "Type ideas 1–3, then words 1–3  ·  ↩ link  ·  ⌥↩ image  ·  ⇧↩ plain text"
                  : "Now words: 1 original · 2 some AI · 3 mostly AI")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
@@ -126,8 +126,8 @@ struct QuickPickerView: View {
             return .handled
         }
         .onKeyPress(keys: [.return]) { press in
-            let kind: ClipKind = press.modifiers.contains(.shift) ? .image
-                : press.modifiers.contains(.option) ? .plainText : .link
+            let kind: ClipKind = press.modifiers.contains(.option) ? .image
+                : press.modifiers.contains(.shift) ? .plainText : .link
             commit(label, as: kind)
             return .handled
         }
