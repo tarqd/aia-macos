@@ -27,24 +27,6 @@ struct MenuBarView: View {
 
             badgeCard(label: label, snippets: snippets)
 
-            HStack(spacing: 8) {
-                Button { model.copy(label, as: .link) } label: {
-                    Label("Copy Label", systemImage: "doc.on.doc")
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.glassProminent)
-                .tint(Color(hex: label.dark))
-                .help("HTML badge for rich editors, Markdown for plain text")
-
-                Button { model.copy(label, as: .image) } label: {
-                    Label("Copy Image", systemImage: "photo").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.glass)
-                .onDrag { LabelClip.itemProvider(snippets, as: .image) }
-                .help("Copy the badge as a PNG, or drag it out")
-            }
-            .controlSize(.large)
         }
         .padding(16)
         .frame(width: 448)
@@ -93,7 +75,7 @@ struct MenuBarView: View {
 
     /// The finished badge: click to copy, drag to insert.
     private func badgeCard(label: AIALabel, snippets: Snippets) -> some View {
-        let copied = model.justCopied == label.code
+        let copied = model.justCopied.flatMap { $0.code == label.code ? $0.kind : nil }
         return VStack(spacing: 6) {
             Button { model.copy(label, as: .link) } label: {
                 BadgePreview(snippets: snippets)
@@ -109,12 +91,19 @@ struct MenuBarView: View {
             .accessibilityLabel("Copy \(snippets.heading)")
 
             Group {
-                if copied {
-                    Label("Copied HTML + Markdown", systemImage: "checkmark.circle.fill")
+                if let copied {
+                    Label(copied == .image ? "Copied image" : copied == .plainText ? "Copied plain text" : "Copied HTML + Markdown",
+                          systemImage: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                 } else {
-                    Text("Click to copy  ·  Drag into a document")
-                        .foregroundStyle(.tertiary)
+                    HStack(spacing: 6) {
+                        Text("Click to copy  ·  Drag into a document  ·")
+                            .foregroundStyle(.tertiary)
+                        Button("Copy as image") { model.copy(label, as: .image) }
+                            .buttonStyle(.link)
+                            .onDrag { LabelClip.itemProvider(snippets, as: .image) }
+                            .help("Copy the badge as a PNG, or drag it out")
+                    }
                 }
             }
             .font(.caption)

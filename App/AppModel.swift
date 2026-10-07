@@ -17,8 +17,13 @@ final class AppModel {
         didSet { defaults.set(try? JSONEncoder().encode(options), forKey: Keys.options) }
     }
 
-    /// The label whose copy confirmation is showing in the menu bar window.
-    private(set) var justCopied: String?
+    struct CopyConfirmation: Equatable {
+        let code: String
+        let kind: ClipKind
+    }
+
+    /// The copy confirmation showing in the menu bar window.
+    private(set) var justCopied: CopyConfirmation?
 
     var selectedLabel: AIALabel {
         spec.label(code: selectedCode) ?? spec.codes[0]
@@ -39,10 +44,11 @@ final class AppModel {
     func copy(_ label: AIALabel, as kind: ClipKind, announce: Bool = false) {
         LabelClip.copy(snippets(for: label), as: kind)
         selectedCode = label.code
-        justCopied = label.code
+        let confirmation = CopyConfirmation(code: label.code, kind: kind)
+        justCopied = confirmation
         Task {
             try? await Task.sleep(for: .seconds(1.5))
-            if justCopied == label.code { justCopied = nil }
+            if justCopied == confirmation { justCopied = nil }
         }
         if announce {
             Toast.show("Copied AIA \(label.code) · \(label.name)", detail: "Press ⌘V to paste")
