@@ -1,0 +1,106 @@
+{
+  "name": "AI Attribution (AIA)",
+  "version": "v1",
+  "site": "https://timothyfcook.com",
+  "essay": "/writing/2026/is-this-worth-my-attention",
+  "license": {
+    "name": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "button": "https://licensebuttons.net/l/by/4.0/88x31.png"
+  },
+  "axes": {
+    "ideas": [
+      "Original ideas",
+      "Some AI ideas",
+      "Mostly AI ideas"
+    ],
+    "words": [
+      "Original writing",
+      "Some AI writing",
+      "Mostly AI writing"
+    ]
+  },
+  "codes": [
+    {
+      "code": "1x1",
+      "name": "No AI",
+      "summary": "Original ideas and writing.",
+      "description": "A person's own ideas and writing. Spellcheck is allowed.",
+      "color": "#5E9660",
+      "tint": "#B3CDB4",
+      "dark": "#3F6B41"
+    },
+    {
+      "code": "1x2",
+      "name": "Polished",
+      "summary": "Original ideas, some AI writing.",
+      "description": "The ideas and the draft were human, but AI did copyedits and redrafting.",
+      "color": "#A5C487",
+      "tint": "#CADDB8",
+      "dark": "#5F8A45"
+    },
+    {
+      "code": "1x3",
+      "name": "Proxied",
+      "summary": "Original ideas, mostly AI writing.",
+      "description": "The argument, prompts, and outline are human, but most of the writing is done by AI.",
+      "color": "#EDD9A0",
+      "tint": "#EEDCA6",
+      "dark": "#A8862F"
+    },
+    {
+      "code": "2x1",
+      "name": "Informed",
+      "summary": "Some AI ideas, original writing.",
+      "description": "The thinking was developed with AI through research, brainstorming or debate, but a person wrote every word.",
+      "color": "#A5C487",
+      "tint": "#CADDB8",
+      "dark": "#5F8A45"
+    },
+    {
+      "code": "2x2",
+      "name": "Paired",
+      "summary": "Some AI ideas and writing.",
+      "description": "A person collaborated with AI on both the ideas and writing.",
+      "color": "#EDD9A0",
+      "tint": "#EEDCA6",
+      "dark": "#A8862F"
+    },
+    {
+      "code": "2x3",
+      "name": "Directed",
+      "summary": "Some AI ideas, mostly AI writing.",
+      "description": "Ideas shaped together, with AI writing most text under direction.",
+      "color": "#E39B75",
+      "tint": "#F0C4AC",
+      "dark": "#B05A31"
+    },
+    {
+      "code": "3x1",
+      "name": "Borrowed",
+      "summary": "Mostly AI ideas, original writing.",
+      "description": "The ideas largely came from AI, and a person wrote them up in their own words.",
+      "color": "#EDD9A0",
+      "tint": "#EEDCA6",
+      "dark": "#A8862F"
+    },
+    {
+      "code": "3x2",
+      "name": "Curated",
+      "summary": "Mostly AI ideas, some AI writing.",
+      "description": "AI came up with the ideas and first draft. A person cut and reworked it.",
+      "color": "#E39B75",
+      "tint": "#F0C4AC",
+      "dark": "#B05A31"
+    },
+    {
+      "code": "3x3",
+      "name": "Slop",
+      "summary": "Mostly AI ideas and writing.",
+      "description": "Vibe writing. A person provided a minimal prompt and the AI did the rest.",
+      "color": "#C2524A",
+      "tint": "#E2A6A1",
+      "dark": "#8E2F28"
+    }
+  ]
+}
