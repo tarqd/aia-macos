@@ -13,13 +13,13 @@ struct LabelGrid: View {
         Grid(horizontalSpacing: 5, verticalSpacing: 5) {
             GridRow {
                 Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
-                ForEach(spec.axes.words, id: \.self) { axis in
-                    axisLabel(axis)
+                ForEach(1...3, id: \.self) { words in
+                    axisLabel(spec.axes.words[words - 1], position: words)
                 }
             }
             ForEach(1...3, id: \.self) { ideas in
                 GridRow {
-                    axisLabel(spec.axes.ideas[ideas - 1], emphasized: pendingIdeas == ideas)
+                    axisLabel(spec.axes.ideas[ideas - 1], position: ideas, emphasized: pendingIdeas == ideas)
                         .multilineTextAlignment(.trailing)
                         .gridColumnAlignment(.trailing)
                     ForEach(1...3, id: \.self) { words in
@@ -36,8 +36,9 @@ struct LabelGrid: View {
         }
     }
 
-    /// "Some AI ideas" → "Some AI\nideas", so headers wrap evenly.
-    private func axisLabel(_ text: String, emphasized: Bool = false) -> some View {
+    /// "Mostly AI ideas" → "Mostly AI\nideas", so headers wrap evenly. The middle ("Some AI")
+    /// header is implied by its position, so it only appears while that row is being picked.
+    private func axisLabel(_ text: String, position: Int, emphasized: Bool = false) -> some View {
         let parts = text.split(separator: " ")
         return Text("\(parts.dropLast().joined(separator: " "))\n\(parts.last ?? "")")
             .font(.caption2)
@@ -45,6 +46,7 @@ struct LabelGrid: View {
             .fontWeight(emphasized ? .semibold : .regular)
             .lineLimit(2)
             .fixedSize()
+            .opacity(position == 2 && !emphasized ? 0 : 1)
     }
 }
 
