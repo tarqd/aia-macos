@@ -9,32 +9,26 @@ struct LabelGrid: View {
     var pendingIdeas: Int? = nil
     let onSelect: (AIALabel) -> Void
 
-    private let shortAxis = ["Original", "Some AI", "Mostly AI"]
-
     var body: some View {
-        Grid(horizontalSpacing: 6, verticalSpacing: 6) {
+        Grid(horizontalSpacing: 5, verticalSpacing: 5) {
             GridRow {
-                Text("Ideas ↓ · Words →")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                ForEach(0..<3, id: \.self) { column in
-                    Text(shortAxis[column])
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .help(spec.axes.words[column])
+                Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                ForEach(spec.axes.words, id: \.self) { axis in
+                    axisLabel(axis)
                 }
             }
             ForEach(1...3, id: \.self) { ideas in
                 GridRow {
-                    Text(shortAxis[ideas - 1])
-                        .font(.caption)
-                        .foregroundStyle(pendingIdeas == ideas ? .primary : .secondary)
-                        .fontWeight(pendingIdeas == ideas ? .semibold : .regular)
+                    axisLabel(spec.axes.ideas[ideas - 1], emphasized: pendingIdeas == ideas)
+                        .multilineTextAlignment(.trailing)
                         .gridColumnAlignment(.trailing)
-                        .help(spec.axes.ideas[ideas - 1])
                     ForEach(1...3, id: \.self) { words in
                         if let label = spec.label(ideas: ideas, words: words) {
-                            cell(label, dimmed: pendingIdeas.map { $0 != ideas } ?? false)
+                            LabelCell(
+                                label: label,
+                                selected: label.code == selectedCode,
+                                dimmed: pendingIdeas.map { $0 != ideas } ?? false
+                            ) { onSelect(label) }
                         }
                     }
                 }
@@ -42,27 +36,49 @@ struct LabelGrid: View {
         }
     }
 
-    private func cell(_ label: AIALabel, dimmed: Bool) -> some View {
-        let selected = label.code == selectedCode
-        return Button {
-            onSelect(label)
-        } label: {
-            VStack(spacing: 1) {
+    /// "Some AI ideas" → "Some AI\nideas", so headers wrap evenly.
+    private func axisLabel(_ text: String, emphasized: Bool = false) -> some View {
+        let parts = text.split(separator: " ")
+        return Text("\(parts.dropLast().joined(separator: " "))\n\(parts.last ?? "")")
+            .font(.caption2)
+            .foregroundStyle(emphasized ? .primary : .secondary)
+            .fontWeight(emphasized ? .semibold : .regular)
+            .lineLimit(2)
+            .fixedSize()
+    }
+}
+
+private struct LabelCell: View {
+    let label: AIALabel
+    let selected: Bool
+    let dimmed: Bool
+    let action: () -> Void
+
+    @State private var hovering = false
+
+    var body: some View {
+        let fill = Color(hex: selected ? label.color : label.tint)
+        Button(action: action) {
+            VStack(spacing: 0) {
                 Text(label.code)
-                    .font(.caption.monospacedDigit().weight(.semibold))
+                    .font(.caption2.monospacedDigit())
+                    .opacity(0.75)
                 Text(label.name)
-                    .font(.caption2)
+                    .font(.caption.weight(.semibold))
             }
-            .foregroundStyle(Color(hex: label.color).mostReadable(of: [Color(hex: label.dark), .white]))
-            .frame(width: 88, height: 40)
-            .background(Color(hex: label.color), in: .rect(cornerRadius: 8))
-            .overlay {
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(selected ? Color.primary : .clear, lineWidth: 2)
-            }
-            .opacity(dimmed ? 0.35 : 1)
+            .foregroundStyle(fill.mostReadable(of: selected ? [Color(white: 0.12), .white] : [Color(hex: label.dark), .white]))
+            .frame(width: 82, height: 38)
+            .background(fill.opacity(selected || hovering ? 1 : 0.55), in: .rect(cornerRadius: 9))
+            .shadow(color: .black.opacity(selected ? 0.18 : 0), radius: 3, y: 1)
+            .scaleEffect(selected ? 1.04 : 1)
+            .opacity(dimmed ? 0.3 : 1)
+            .animation(.snappy(duration: 0.15), value: selected)
+            .animation(.snappy(duration: 0.15), value: hovering)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        .focusEffectDisabled()
+        .onHover { hovering = $0 }
         .help("\(label.summary) \(label.description)")
         .accessibilityLabel("AIA \(label.code), \(label.name). \(label.summary)")
         .accessibilityAddTraits(selected ? .isSelected : [])

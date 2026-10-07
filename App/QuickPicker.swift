@@ -85,6 +85,7 @@ struct QuickPickerView: View {
             LabelGrid(spec: model.spec, selectedCode: highlighted, pendingIdeas: pendingIdeas) {
                 commit($0, as: .link)
             }
+            .frame(maxWidth: .infinity)
 
             VStack(alignment: .leading, spacing: 4) {
                 BadgePreview(snippets: model.snippets(for: label))
@@ -101,7 +102,7 @@ struct QuickPickerView: View {
                 .foregroundStyle(.tertiary)
         }
         .padding(18)
-        .frame(width: 420)
+        .frame(width: 448)
         .focusable()
         .focusEffectDisabled()
         .focused($focused)
