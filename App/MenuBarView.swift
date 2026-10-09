@@ -64,7 +64,7 @@ struct MenuBarView: View {
         scrollAccumulator += event.hasPreciseScrollingDeltas ? delta : delta * 12
         guard abs(scrollAccumulator) >= 12 else { return }
         // Scrolling down (or swiping left) moves toward smaller sizes.
-        model.options.size = model.options.size.stepped(by: scrollAccumulator < 0 ? 1 : -1)
+        model.options.size = model.options.size.stepped(by: scrollAccumulator < 0 ? -1 : 1)
         scrollAccumulator = 0
     }
 
@@ -143,28 +143,34 @@ struct MenuBarView: View {
             .focusEffectDisabled()
             .onDrag { LabelClip.itemProvider(snippets, as: currentKind) }
             .onHover { cardHovered = $0 }
-            .help("Click to copy, or drag into a document")
             .animation(.snappy(duration: 0.2), value: model.options.size)
             .accessibilityLabel("Copy \(snippets.heading)")
             .accessibilityHint("Hold Option to copy the badge image instead")
 
-            Group {
-                if let copied {
-                    Label(copied == .image ? "Copied image" : copied == .plainText ? "Copied plain text" : "Copied HTML + Markdown",
-                          systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                } else if optionHeld {
-                    Label("Click or drag to use the image instead of the link", systemImage: "photo")
-                        .foregroundStyle(.tint)
-                } else {
-                    SizeStrip(size: $model.options.size, emphasized: cardHovered)
+            HStack(spacing: 6) {
+                Group {
+                    if let copied {
+                        Label(copied == .image ? "Copied image" : copied == .plainText ? "Copied plain text" : "Copied HTML + Markdown",
+                              systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                    } else if optionHeld {
+                        Label("Click or drag to use the image", systemImage: "photo")
+                            .foregroundStyle(.tint)
+                    } else {
+                        Text("Click to copy  ·  Drag into a document")
+                            .foregroundStyle(.tertiary)
+                    }
                 }
+                .contentTransition(.opacity)
+                .animation(.default, value: copied)
+                .animation(.easeOut(duration: 0.12), value: optionHeld)
+
+                Text("·").foregroundStyle(.tertiary)
+
+                SizeStrip(size: $model.options.size, emphasized: cardHovered)
             }
             .font(.caption)
             .frame(height: 16)
-            .contentTransition(.opacity)
-            .animation(.default, value: copied)
-            .animation(.easeOut(duration: 0.12), value: optionHeld)
         }
     }
 }

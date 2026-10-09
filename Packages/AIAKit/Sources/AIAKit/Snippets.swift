@@ -1,12 +1,12 @@
 import Foundation
 
-/// The badge sizes offered on the AIA site.
+/// The badge sizes offered on the AIA site, smallest first.
 public enum BadgeSize: String, CaseIterable, Codable, Sendable {
-    case wide
-    case medium
-    case compact
     /// A one-line text label with a small icon instead of a badge.
     case textLine
+    case compact
+    case medium
+    case wide
 
     public var displayName: String {
         switch self {
