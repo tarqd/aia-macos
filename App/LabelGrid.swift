@@ -67,32 +67,35 @@ struct LabelGrid: View {
     }
 }
 
-/// A thin axis line with its name in the middle and an arrowhead pointing toward "AI".
+/// A continuous axis line with an arrowhead pointing toward "AI", named like a chart axis:
+/// above the line when horizontal, rotated alongside it when vertical.
 private struct AxisArrow: View {
     let title: String
     let axis: Axis
     var emphasized = false
 
     var body: some View {
-        let layout = axis == .horizontal ? AnyLayout(HStackLayout(spacing: 4)) : AnyLayout(VStackLayout(spacing: 3))
+        let layout = axis == .horizontal ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
         layout {
-            line
-            Text(title)
-                .font(.caption2)
-                .foregroundStyle(emphasized ? .secondary : .tertiary)
-                .fixedSize()
-            line
+            Rectangle()
+                .fill(.tertiary)
+                .frame(width: axis == .vertical ? 1 : nil, height: axis == .horizontal ? 1 : nil)
             Image(systemName: axis == .horizontal ? "arrowtriangle.right.fill" : "arrowtriangle.down.fill")
                 .font(.system(size: 6))
                 .foregroundStyle(.tertiary)
-                .padding(axis == .horizontal ? .leading : .top, -4)
+                .padding(axis == .horizontal ? .leading : .top, -2)
         }
-    }
-
-    private var line: some View {
-        Rectangle()
-            .fill(.tertiary)
-            .frame(width: axis == .vertical ? 1 : nil, height: axis == .horizontal ? 1 : nil)
+        .overlay {
+            let text = Text(title)
+                .font(.caption2)
+                .foregroundStyle(emphasized ? .secondary : .tertiary)
+                .fixedSize()
+            if axis == .horizontal {
+                text.offset(y: -8)
+            } else {
+                text.rotationEffect(.degrees(-90)).offset(x: -8)
+            }
+        }
     }
 }
 
