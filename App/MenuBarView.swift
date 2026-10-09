@@ -133,7 +133,7 @@ struct MenuBarView: View {
                           systemImage: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                 } else if optionHeld {
-                    Label("Click or drag to use the image instead of the link", systemImage: "photo")
+                    Label("Click or drag as an image", systemImage: "photo")
                         .foregroundStyle(.tint)
                 } else {
                     Text("Click to copy or drag and drop")
