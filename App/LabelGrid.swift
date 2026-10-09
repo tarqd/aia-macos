@@ -18,18 +18,18 @@ struct LabelGrid: View {
         // Chart-style axes: "Human" is the shared origin, and each axis runs toward AI.
         Grid(alignment: .center, horizontalSpacing: 8, verticalSpacing: 6) {
             GridRow {
-                axisText("Human")
+                axisIcon("person.fill", label: "Human")
                 AxisArrow(title: "writing", axis: .horizontal)
                     .frame(width: Self.gridSide)
                     .overlay(alignment: .trailing) {
-                        axisText("AI").alignmentGuide(.trailing) { $0[.leading] - 4 }
+                        axisIcon("sparkles", label: "AI").alignmentGuide(.trailing) { $0[.leading] - 4 }
                     }
             }
             GridRow {
                 AxisArrow(title: "ideas", axis: .vertical, emphasized: pendingIdeas != nil)
                     .frame(height: Self.gridSide)
                     .overlay(alignment: .bottom) {
-                        axisText("AI").alignmentGuide(.bottom) { $0[.top] - 3 }
+                        axisIcon("sparkles", label: "AI").alignmentGuide(.bottom) { $0[.top] - 3 }
                     }
                 cells
             }
@@ -59,11 +59,13 @@ struct LabelGrid: View {
         .onHover { if !$0 { onHover?(nil) } }
     }
 
-    private func axisText(_ text: String) -> some View {
-        Text(text)
-            .font(.caption2.weight(.medium))
+    private func axisIcon(_ systemName: String, label: String) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 11, weight: .medium))
             .foregroundStyle(.secondary)
             .fixedSize()
+            .help(label)
+            .accessibilityLabel(label)
     }
 }
 
