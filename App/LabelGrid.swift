@@ -12,11 +12,13 @@ struct LabelGrid: View {
     let onSelect: (AIALabel) -> Void
 
     var body: some View {
-        Grid(horizontalSpacing: 6, verticalSpacing: 6) {
+        Grid(horizontalSpacing: 5, verticalSpacing: 5) {
             GridRow {
                 Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
                 ForEach(1...3, id: \.self) { words in
                     axisLabel(spec.axes.words[words - 1], position: words)
+                        // Headers may be wider than a cell; don't let them stretch the columns.
+                        .gridCellUnsizedAxes(.horizontal)
                 }
             }
             ForEach(1...3, id: \.self) { ideas in
@@ -66,20 +68,10 @@ private struct LabelCell: View {
     var body: some View {
         let fill = Color(hex: selected ? label.color : label.tint)
         Button(action: action) {
-            VStack(spacing: 0) {
-                Text(label.code)
-                    .font(.caption2.monospacedDigit())
-                    .opacity(0.75)
-                Text(label.name)
-                    .font(.caption.weight(.semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .foregroundStyle(fill.mostReadable(of: selected ? [Color(white: 0.12), .white] : [Color(hex: label.dark), .white]))
-            // The badge below names the selection, so cells stay quiet until hovered.
-            .opacity(hovering ? 1 : 0)
-            .frame(width: 64, height: 64)
-            .background(fill.opacity(selected || hovering ? 1 : 0.55), in: .rect(cornerRadius: 12))
+            // The panel beside the grid names the hovered or selected label, so cells are color only.
+            RoundedRectangle(cornerRadius: 9)
+                .fill(fill.opacity(selected || hovering ? 1 : 0.55))
+                .frame(width: 44, height: 44)
             .shadow(color: .black.opacity(selected ? 0.18 : 0), radius: 3, y: 1)
             .scaleEffect(selected ? 1.04 : 1)
             .opacity(dimmed ? 0.3 : 1)
@@ -91,7 +83,6 @@ private struct LabelCell: View {
         .focusEffectDisabled()
         .pointerStyle(.link)
         .onHover { hovering = $0 }
-        .help("\(label.summary) \(label.description)")
         .accessibilityLabel("AIA \(label.code), \(label.name). \(label.summary)")
         .accessibilityAddTraits(selected ? .isSelected : [])
     }

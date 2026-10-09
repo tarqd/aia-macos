@@ -22,19 +22,12 @@ struct MenuBarView: View {
         VStack(alignment: .leading, spacing: 14) {
             header(label: label, snippets: snippets)
 
-            VStack(spacing: 8) {
+            HStack(alignment: .center, spacing: 20) {
                 LabelGrid(spec: model.spec, selectedCode: model.selectedCode,
                           onHover: { hoveredCode = $0?.code }) { model.selectedCode = $0.code }
 
-                Text(preview.description)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    // Reserve two lines so the layout doesn't jump between labels.
-                    .lineLimit(2, reservesSpace: true)
-                    .padding(.horizontal, 24)
+                LabelInfo(label: preview)
             }
-            .frame(maxWidth: .infinity)
 
             badgeCard(label: preview, snippets: model.snippets(for: preview))
         }
@@ -177,5 +170,29 @@ struct MenuBarView: View {
             SizeStrip(size: $model.options.size, emphasized: cardHovered)
                 .frame(height: 16)
         }
+    }
+}
+
+/// Name and description of the hovered or selected label, beside the grid.
+struct LabelInfo: View {
+    let label: AIALabel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(label.name)
+                    .font(.title3.weight(.semibold))
+                Text(label.code)
+                    .font(.callout.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            Text(label.description)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                // Reserve space so the layout doesn't jump between labels.
+                .lineLimit(5, reservesSpace: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
     }
 }

@@ -82,18 +82,15 @@ struct QuickPickerView: View {
         let label = model.spec.label(code: highlighted) ?? model.selectedLabel
 
         VStack(alignment: .leading, spacing: 12) {
-            LabelGrid(spec: model.spec, selectedCode: highlighted, pendingIdeas: pendingIdeas) {
-                commit($0, as: .link)
+            HStack(alignment: .center, spacing: 20) {
+                LabelGrid(spec: model.spec, selectedCode: highlighted, pendingIdeas: pendingIdeas) {
+                    commit($0, as: .link)
+                }
+                LabelInfo(label: label)
             }
-            .frame(maxWidth: .infinity)
 
-            VStack(alignment: .leading, spacing: 4) {
-                BadgePreview(snippets: model.snippets(for: label))
-                Text(label.description)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            BadgePreview(snippets: model.snippets(for: label))
+                .frame(maxWidth: .infinity, minHeight: 31)
 
             Text(pendingIdeas == nil
                  ? "Type ideas 1–3, then words 1–3  ·  ↩ link  ·  ⌥↩ image  ·  ⇧↩ plain text"
