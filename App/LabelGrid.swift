@@ -11,25 +11,37 @@ struct LabelGrid: View {
     var onHover: ((AIALabel?) -> Void)? = nil
     let onSelect: (AIALabel) -> Void
 
+    private static let spacing: CGFloat = 5
+    private static let gridSide = LabelCell.side * 3 + spacing * 2
+
     var body: some View {
-        Grid(horizontalSpacing: 5, verticalSpacing: 5) {
+        // Chart-style axes: "Human" is the shared origin, and each axis runs toward AI.
+        Grid(alignment: .center, horizontalSpacing: 8, verticalSpacing: 6) {
             GridRow {
-                Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
-                ForEach(1...3, id: \.self) { words in
-                    // Headers are wider than a cell: overlay them, starting at the cell's
-                    // leading edge, so they overhang without stretching the column.
-                    Color.clear
-                        .frame(height: 14)
-                        .overlay(alignment: .leading) { axisLabel(Self.wordsAxis[words - 1], position: words) }
-                        .gridCellUnsizedAxes(.horizontal)
-                }
+                axisText("Human")
+                AxisArrow(title: "writing", axis: .horizontal)
+                    .frame(width: Self.gridSide)
+                    .overlay(alignment: .trailing) {
+                        axisText("AI").alignmentGuide(.trailing) { $0[.leading] - 4 }
+                    }
             }
+            GridRow {
+                AxisArrow(title: "ideas", axis: .vertical, emphasized: pendingIdeas != nil)
+                    .frame(height: Self.gridSide)
+                    .overlay(alignment: .bottom) {
+                        axisText("AI").alignmentGuide(.bottom) { $0[.top] - 3 }
+                    }
+                cells
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Ideas from human to AI, down; writing from human to AI, across")
+    }
+
+    private var cells: some View {
+        Grid(horizontalSpacing: Self.spacing, verticalSpacing: Self.spacing) {
             ForEach(1...3, id: \.self) { ideas in
                 GridRow {
-                    axisLabel(Self.ideasAxis[ideas - 1], position: ideas, emphasized: pendingIdeas == ideas)
-                        // Line the label up with the top of its row of cells.
-                        .frame(height: LabelCell.side, alignment: .top)
-                        .gridColumnAlignment(.leading)
                     ForEach(1...3, id: \.self) { words in
                         if let label = spec.label(ideas: ideas, words: words) {
                             LabelCell(
@@ -47,21 +59,40 @@ struct LabelGrid: View {
         .onHover { if !$0 { onHover?(nil) } }
     }
 
-    /// Shorter than the spec's axis names ("Original writing", "Mostly AI writing"), which
-    /// the info panel and badge spell out in full.
-    private static let wordsAxis = ["Human writing", "Some AI writing", "AI writing"]
-    private static let ideasAxis = ["Human ideas", "Some AI ideas", "AI ideas"]
-
-    /// The middle ("Some AI") header is implied by its position, so it only appears while that
-    /// row is being picked.
-    private func axisLabel(_ text: String, position: Int, emphasized: Bool = false) -> some View {
+    private func axisText(_ text: String) -> some View {
         Text(text)
-            .font(.caption2)
-            .foregroundStyle(emphasized ? .primary : .secondary)
-            .fontWeight(emphasized ? .semibold : .regular)
-            .lineLimit(1)
+            .font(.caption2.weight(.medium))
+            .foregroundStyle(.secondary)
             .fixedSize()
-            .opacity(position == 2 && !emphasized ? 0 : 1)
+    }
+}
+
+/// A thin axis line with its name in the middle and an arrowhead pointing toward "AI".
+private struct AxisArrow: View {
+    let title: String
+    let axis: Axis
+    var emphasized = false
+
+    var body: some View {
+        let layout = axis == .horizontal ? AnyLayout(HStackLayout(spacing: 4)) : AnyLayout(VStackLayout(spacing: 3))
+        layout {
+            line
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(emphasized ? .secondary : .tertiary)
+                .fixedSize()
+            line
+            Image(systemName: axis == .horizontal ? "arrowtriangle.right.fill" : "arrowtriangle.down.fill")
+                .font(.system(size: 6))
+                .foregroundStyle(.tertiary)
+                .padding(axis == .horizontal ? .leading : .top, -4)
+        }
+    }
+
+    private var line: some View {
+        Rectangle()
+            .fill(.tertiary)
+            .frame(width: axis == .vertical ? 1 : nil, height: axis == .horizontal ? 1 : nil)
     }
 }
 
