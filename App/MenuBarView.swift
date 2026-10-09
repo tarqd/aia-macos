@@ -7,6 +7,10 @@ struct MenuBarView: View {
     /// Holding ⌥ switches clicks and drags from the link to the badge image.
     @State private var optionHeld = NSEvent.modifierFlags.contains(.option)
     @State private var flagsMonitor: Any?
+    /// Scrolling over the badge card steps through sizes.
+    @State private var scrollMonitor: Any?
+    @State private var scrollAccumulator: CGFloat = 0
+    @State private var cardHovered = false
 
     var body: some View {
         let label = model.selectedLabel
@@ -38,11 +42,30 @@ struct MenuBarView: View {
                 optionHeld = event.modifierFlags.contains(.option) || Self.forceOption
                 return event
             }
+            scrollMonitor = NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { event in
+                guard cardHovered else { return event }
+                scrollSize(by: event)
+                return nil
+            }
         }
         .onDisappear {
-            if let flagsMonitor { NSEvent.removeMonitor(flagsMonitor) }
+            for monitor in [flagsMonitor, scrollMonitor].compactMap(\.self) { NSEvent.removeMonitor(monitor) }
             flagsMonitor = nil
+            scrollMonitor = nil
         }
+    }
+
+    /// One wheel notch, or a short trackpad swipe, moves one size. Momentum is ignored so a
+    /// flick doesn't fly past the size you wanted.
+    private func scrollSize(by event: NSEvent) {
+        guard event.momentumPhase.isEmpty else { return }
+        if event.phase == .began { scrollAccumulator = 0 }
+        let delta = abs(event.scrollingDeltaY) >= abs(event.scrollingDeltaX) ? event.scrollingDeltaY : -event.scrollingDeltaX
+        scrollAccumulator += event.hasPreciseScrollingDeltas ? delta : delta * 12
+        guard abs(scrollAccumulator) >= 12 else { return }
+        // Scrolling down (or swiping left) moves toward smaller sizes.
+        model.options.size = model.options.size.stepped(by: scrollAccumulator < 0 ? 1 : -1)
+        scrollAccumulator = 0
     }
 
     #if DEBUG
@@ -100,11 +123,13 @@ struct MenuBarView: View {
 
     /// The finished badge: click to copy, drag to insert.
     private func badgeCard(label: AIALabel, snippets: Snippets) -> some View {
+        @Bindable var model = model
         let copied = model.justCopied.flatMap { $0.code == label.code ? $0.kind : nil }
         return VStack(spacing: 6) {
             Button { model.copy(label, as: currentKind) } label: {
                 BadgePreview(snippets: snippets)
-                    .frame(maxWidth: .infinity)
+                    // Keep the card the same height across sizes.
+                    .frame(maxWidth: .infinity, minHeight: 31)
                     .padding(.vertical, 16)
                     .padding(.horizontal, 12)
                     .background(.quaternary.opacity(0.6), in: .rect(cornerRadius: 12))
@@ -117,6 +142,9 @@ struct MenuBarView: View {
             .buttonStyle(.plain)
             .focusEffectDisabled()
             .onDrag { LabelClip.itemProvider(snippets, as: currentKind) }
+            .onHover { cardHovered = $0 }
+            .help("Click to copy, or drag into a document")
+            .animation(.snappy(duration: 0.2), value: model.options.size)
             .accessibilityLabel("Copy \(snippets.heading)")
             .accessibilityHint("Hold Option to copy the badge image instead")
 
@@ -129,11 +157,11 @@ struct MenuBarView: View {
                     Label("Click or drag to use the image instead of the link", systemImage: "photo")
                         .foregroundStyle(.tint)
                 } else {
-                    Text("Click to copy  ·  Drag into a document")
-                        .foregroundStyle(.tertiary)
+                    SizeStrip(size: $model.options.size, emphasized: cardHovered)
                 }
             }
             .font(.caption)
+            .frame(height: 16)
             .contentTransition(.opacity)
             .animation(.default, value: copied)
             .animation(.easeOut(duration: 0.12), value: optionHeld)
