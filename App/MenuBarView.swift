@@ -26,6 +26,8 @@ struct MenuBarView: View {
 
                 LabelInfo(label: preview)
             }
+            // Clear the menu buttons in the top-right corner.
+            .padding(.top, 18)
 
             badgeCard(label: preview, snippets: model.snippets(for: preview))
         }

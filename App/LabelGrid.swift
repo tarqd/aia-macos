@@ -16,19 +16,20 @@ struct LabelGrid: View {
             GridRow {
                 Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
                 ForEach(1...3, id: \.self) { words in
-                    // Headers are wider than a cell: overlay them so they overhang
-                    // without stretching the column.
+                    // Headers are wider than a cell: overlay them, starting at the cell's
+                    // leading edge, so they overhang without stretching the column.
                     Color.clear
                         .frame(height: 14)
-                        .overlay { axisLabel(spec.axes.words[words - 1], position: words) }
+                        .overlay(alignment: .leading) { axisLabel(Self.wordsAxis[words - 1], position: words) }
                         .gridCellUnsizedAxes(.horizontal)
                 }
             }
             ForEach(1...3, id: \.self) { ideas in
                 GridRow {
-                    axisLabel(spec.axes.ideas[ideas - 1], position: ideas, emphasized: pendingIdeas == ideas)
-                        .multilineTextAlignment(.trailing)
-                        .gridColumnAlignment(.trailing)
+                    axisLabel(Self.ideasAxis[ideas - 1], position: ideas, emphasized: pendingIdeas == ideas)
+                        // Line the label up with the top of its row of cells.
+                        .frame(height: LabelCell.side, alignment: .top)
+                        .gridColumnAlignment(.leading)
                     ForEach(1...3, id: \.self) { words in
                         if let label = spec.label(ideas: ideas, words: words) {
                             LabelCell(
@@ -45,6 +46,11 @@ struct LabelGrid: View {
         // Clear only when leaving the whole grid, so the gaps between cells don't flicker.
         .onHover { if !$0 { onHover?(nil) } }
     }
+
+    /// Shorter than the spec's axis names ("Original writing", "Mostly AI writing"), which
+    /// the info panel and badge spell out in full.
+    private static let wordsAxis = ["Human writing", "Some AI writing", "AI writing"]
+    private static let ideasAxis = ["Human ideas", "Some AI ideas", "AI ideas"]
 
     /// The middle ("Some AI") header is implied by its position, so it only appears while that
     /// row is being picked.
@@ -65,6 +71,8 @@ private struct LabelCell: View {
     let dimmed: Bool
     let action: () -> Void
 
+    static let side: CGFloat = 44
+
     @State private var hovering = false
 
     var body: some View {
@@ -73,7 +81,7 @@ private struct LabelCell: View {
             // The panel beside the grid names the hovered or selected label, so cells are color only.
             RoundedRectangle(cornerRadius: 9)
                 .fill(fill.opacity(selected || hovering ? 1 : 0.55))
-                .frame(width: 44, height: 44)
+                .frame(width: Self.side, height: Self.side)
             .shadow(color: .black.opacity(selected ? 0.18 : 0), radius: 3, y: 1)
             .scaleEffect(selected ? 1.04 : 1)
             .opacity(dimmed ? 0.3 : 1)
