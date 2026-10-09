@@ -20,8 +20,6 @@ struct MenuBarView: View {
         let preview = hoveredCode.flatMap(model.spec.label(code:)) ?? label
 
         VStack(alignment: .leading, spacing: 14) {
-            header(label: label, snippets: snippets)
-
             HStack(alignment: .center, spacing: 20) {
                 LabelGrid(spec: model.spec, selectedCode: model.selectedCode,
                           onHover: { hoveredCode = $0?.code }) { model.selectedCode = $0.code }
@@ -30,6 +28,10 @@ struct MenuBarView: View {
             }
 
             badgeCard(label: preview, snippets: model.snippets(for: preview))
+        }
+        // The menus sit in the empty corner above the info panel, so no title row is needed.
+        .overlay(alignment: .topTrailing) {
+            menus(label: label, snippets: snippets)
         }
         .padding(16)
         .frame(width: 448)
@@ -77,12 +79,9 @@ struct MenuBarView: View {
         NSEvent.modifierFlags.contains(.option) ? .image : .link
     }
 
-    private func header(label: AIALabel, snippets: Snippets) -> some View {
+    private func menus(label: AIALabel, snippets: Snippets) -> some View {
         @Bindable var model = model
-        return HStack {
-            Text("AI Attribution")
-                .font(.headline)
-            Spacer()
+        return HStack(spacing: 10) {
             Menu {
                 Picker("Size", selection: $model.options.size) {
                     ForEach(BadgeSize.allCases, id: \.self) { Text($0.displayName) }
