@@ -167,6 +167,7 @@ struct MenuBarView: View {
             }
             .buttonStyle(.plain)
             .focusEffectDisabled()
+            .pointerStyle(.link)
             .onDrag { LabelClip.itemProvider(snippets, as: currentKind) }
             .onHover { cardHovered = $0 }
             .animation(.snappy(duration: 0.2), value: model.options.size)

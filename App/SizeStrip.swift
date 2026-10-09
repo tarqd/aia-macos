@@ -23,6 +23,7 @@ struct SizeStrip: View {
                 }
                 .buttonStyle(.plain)
                 .focusEffectDisabled()
+                .pointerStyle(.link)
                 .help(option.displayName)
                 .accessibilityLabel(option.displayName)
                 .accessibilityAddTraits(option == size ? .isSelected : [])

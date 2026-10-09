@@ -12,7 +12,7 @@ struct LabelGrid: View {
     let onSelect: (AIALabel) -> Void
 
     var body: some View {
-        Grid(horizontalSpacing: 5, verticalSpacing: 5) {
+        Grid(horizontalSpacing: 6, verticalSpacing: 6) {
             GridRow {
                 Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
                 ForEach(1...3, id: \.self) { words in
@@ -72,12 +72,14 @@ private struct LabelCell: View {
                     .opacity(0.75)
                 Text(label.name)
                     .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .foregroundStyle(fill.mostReadable(of: selected ? [Color(white: 0.12), .white] : [Color(hex: label.dark), .white]))
             // The badge below names the selection, so cells stay quiet until hovered.
             .opacity(hovering ? 1 : 0)
-            .frame(width: 82, height: 38)
-            .background(fill.opacity(selected || hovering ? 1 : 0.55), in: .rect(cornerRadius: 9))
+            .frame(width: 64, height: 64)
+            .background(fill.opacity(selected || hovering ? 1 : 0.55), in: .rect(cornerRadius: 12))
             .shadow(color: .black.opacity(selected ? 0.18 : 0), radius: 3, y: 1)
             .scaleEffect(selected ? 1.04 : 1)
             .opacity(dimmed ? 0.3 : 1)
@@ -87,6 +89,7 @@ private struct LabelCell: View {
         }
         .buttonStyle(.plain)
         .focusEffectDisabled()
+        .pointerStyle(.link)
         .onHover { hovering = $0 }
         .help("\(label.summary) \(label.description)")
         .accessibilityLabel("AIA \(label.code), \(label.name). \(label.summary)")
