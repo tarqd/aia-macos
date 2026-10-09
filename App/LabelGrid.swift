@@ -15,22 +15,17 @@ struct LabelGrid: View {
     private static let gridSide = LabelCell.side * 3 + spacing * 2
 
     var body: some View {
-        // Chart-style axes: "Human" is the shared origin, and each axis runs toward AI.
+        // Chart-style axes: the person icon is the shared human origin, and each arrow points
+        // toward more AI.
         Grid(alignment: .center, horizontalSpacing: 8, verticalSpacing: 6) {
             GridRow {
                 axisIcon("person.fill", label: "Human")
                 AxisArrow(title: "writing", axis: .horizontal)
                     .frame(width: Self.gridSide)
-                    .overlay(alignment: .trailing) {
-                        axisIcon("sparkles", label: "AI").alignmentGuide(.trailing) { $0[.leading] - 4 }
-                    }
             }
             GridRow {
                 AxisArrow(title: "ideas", axis: .vertical, emphasized: pendingIdeas != nil)
                     .frame(height: Self.gridSide)
-                    .overlay(alignment: .bottom) {
-                        axisIcon("sparkles", label: "AI").alignmentGuide(.bottom) { $0[.top] - 3 }
-                    }
                 cells
             }
         }
@@ -69,7 +64,7 @@ struct LabelGrid: View {
     }
 }
 
-/// A continuous axis line with an arrowhead pointing toward "AI", named like a chart axis:
+/// A continuous axis line with an arrowhead pointing toward more AI, named like a chart axis:
 /// above the line when horizontal, rotated alongside it when vertical.
 private struct AxisArrow: View {
     let title: String
