@@ -126,6 +126,28 @@ struct MenuBarView: View {
         @Bindable var model = model
         let copied = model.justCopied.flatMap { $0.code == label.code ? $0.kind : nil }
         return VStack(spacing: 6) {
+            // Hint above the card: shown on hover, and for copy and ⌥ feedback.
+            Group {
+                if let copied {
+                    Label(copied == .image ? "Copied image" : copied == .plainText ? "Copied plain text" : "Copied HTML + Markdown",
+                          systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                } else if optionHeld {
+                    Label("Click or drag to use the image instead of the link", systemImage: "photo")
+                        .foregroundStyle(.tint)
+                } else {
+                    Text("Click to copy or drag and drop")
+                        .foregroundStyle(.tertiary)
+                        .opacity(cardHovered ? 1 : 0)
+                }
+            }
+            .font(.caption)
+            .frame(height: 16)
+            .contentTransition(.opacity)
+            .animation(.default, value: copied)
+            .animation(.easeOut(duration: 0.12), value: optionHeld)
+            .animation(.easeOut(duration: 0.15), value: cardHovered)
+
             Button { model.copy(label, as: currentKind) } label: {
                 BadgePreview(snippets: snippets)
                     // Keep the card the same height across sizes.
@@ -145,32 +167,10 @@ struct MenuBarView: View {
             .onHover { cardHovered = $0 }
             .animation(.snappy(duration: 0.2), value: model.options.size)
             .accessibilityLabel("Copy \(snippets.heading)")
-            .accessibilityHint("Hold Option to copy the badge image instead")
+            .accessibilityHint("Click to copy or drag and drop. Hold Option to use the badge image instead.")
 
-            HStack(spacing: 6) {
-                Group {
-                    if let copied {
-                        Label(copied == .image ? "Copied image" : copied == .plainText ? "Copied plain text" : "Copied HTML + Markdown",
-                              systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                    } else if optionHeld {
-                        Label("Click or drag to use the image", systemImage: "photo")
-                            .foregroundStyle(.tint)
-                    } else {
-                        Text("Click to copy  ·  Drag into a document")
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-                .contentTransition(.opacity)
-                .animation(.default, value: copied)
-                .animation(.easeOut(duration: 0.12), value: optionHeld)
-
-                Text("·").foregroundStyle(.tertiary)
-
-                SizeStrip(size: $model.options.size, emphasized: cardHovered)
-            }
-            .font(.caption)
-            .frame(height: 16)
+            SizeStrip(size: $model.options.size, emphasized: cardHovered)
+                .frame(height: 16)
         }
     }
 }
