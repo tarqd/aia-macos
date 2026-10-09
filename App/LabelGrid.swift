@@ -13,18 +13,28 @@ struct LabelGrid: View {
 
     private static let spacing: CGFloat = 5
     private static let gridSide = LabelCell.side * 3 + spacing * 2
+    /// Space between the axes and the cells.
+    private static let axisGap: CGFloat = 7
 
     var body: some View {
         // Chart-style axes: the person icon is the shared human origin, and each arrow points
         // toward more AI.
-        Grid(alignment: .center, horizontalSpacing: 8, verticalSpacing: 6) {
+        Grid(alignment: .center, horizontalSpacing: Self.axisGap, verticalSpacing: Self.axisGap) {
             GridRow {
-                axisIcon("person.fill", label: "Human")
+                Image(systemName: "person.circle.fill")
+                    .font(.system(size: 16))
+                    .foregroundStyle(.secondary)
+                    .fixedSize()
+                    .help("Human")
+                    .accessibilityLabel("Human")
+                // The negative padding runs each line back across the gap so it starts at the circle.
                 AxisArrow(title: "writing", axis: .horizontal)
+                    .padding(.leading, -Self.axisGap)
                     .frame(width: Self.gridSide)
             }
             GridRow {
                 AxisArrow(title: "ideas", axis: .vertical, emphasized: pendingIdeas != nil)
+                    .padding(.top, -Self.axisGap)
                     .frame(height: Self.gridSide)
                 cells
             }
@@ -52,15 +62,6 @@ struct LabelGrid: View {
         }
         // Clear only when leaving the whole grid, so the gaps between cells don't flicker.
         .onHover { if !$0 { onHover?(nil) } }
-    }
-
-    private func axisIcon(_ systemName: String, label: String) -> some View {
-        Image(systemName: systemName)
-            .font(.system(size: 11, weight: .medium))
-            .foregroundStyle(.secondary)
-            .fixedSize()
-            .help(label)
-            .accessibilityLabel(label)
     }
 }
 
