@@ -7,6 +7,8 @@ struct LabelGrid: View {
     let selectedCode: String
     /// Ideas row chosen by the first keypress in the hotkey picker.
     var pendingIdeas: Int? = nil
+    /// The cell under the pointer, or nil once the pointer leaves the grid.
+    var onHover: ((AIALabel?) -> Void)? = nil
     let onSelect: (AIALabel) -> Void
 
     var body: some View {
@@ -29,11 +31,14 @@ struct LabelGrid: View {
                                 selected: label.code == selectedCode,
                                 dimmed: pendingIdeas.map { $0 != ideas } ?? false
                             ) { onSelect(label) }
+                            .onHover { if $0 { onHover?(label) } }
                         }
                     }
                 }
             }
         }
+        // Clear only when leaving the whole grid, so the gaps between cells don't flicker.
+        .onHover { if !$0 { onHover?(nil) } }
     }
 
     /// "Mostly AI ideas" → "Mostly AI\nideas", so headers wrap evenly. The middle ("Some AI")

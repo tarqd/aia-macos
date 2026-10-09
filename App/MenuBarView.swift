@@ -11,18 +11,22 @@ struct MenuBarView: View {
     @State private var scrollMonitor: Any?
     @State private var scrollAccumulator: CGFloat = 0
     @State private var cardHovered = false
+    /// The grid cell under the pointer, previewed until the pointer leaves the grid.
+    @State private var hoveredCode: String?
 
     var body: some View {
         let label = model.selectedLabel
         let snippets = model.snippets(for: label)
+        let preview = hoveredCode.flatMap(model.spec.label(code:)) ?? label
 
         VStack(alignment: .leading, spacing: 14) {
             header(label: label, snippets: snippets)
 
             VStack(spacing: 8) {
-                LabelGrid(spec: model.spec, selectedCode: model.selectedCode) { model.selectedCode = $0.code }
+                LabelGrid(spec: model.spec, selectedCode: model.selectedCode,
+                          onHover: { hoveredCode = $0?.code }) { model.selectedCode = $0.code }
 
-                Text(label.description)
+                Text(preview.description)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -32,7 +36,7 @@ struct MenuBarView: View {
             }
             .frame(maxWidth: .infinity)
 
-            badgeCard(label: label, snippets: snippets)
+            badgeCard(label: preview, snippets: model.snippets(for: preview))
         }
         .padding(16)
         .frame(width: 448)
