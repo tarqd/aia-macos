@@ -16,7 +16,7 @@ struct LabelGrid: View {
     /// Space between the axes and the cells.
     private static let axisGap: CGFloat = 7
     /// Clearance between the person circle and where the axis lines begin.
-    private static let ringGap: CGFloat = 3
+    private static let ringGap: CGFloat = 4.5
 
     var body: some View {
         // Chart-style axes: the person icon is the shared human origin, and each arrow points
