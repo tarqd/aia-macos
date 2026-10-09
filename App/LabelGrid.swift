@@ -15,6 +15,8 @@ struct LabelGrid: View {
     private static let gridSide = LabelCell.side * 3 + spacing * 2
     /// Space between the axes and the cells.
     private static let axisGap: CGFloat = 7
+    /// Clearance between the person circle and where the axis lines begin.
+    private static let ringGap: CGFloat = 3
 
     var body: some View {
         // Chart-style axes: the person icon is the shared human origin, and each arrow points
@@ -27,14 +29,15 @@ struct LabelGrid: View {
                     .fixedSize()
                     .help("Human")
                     .accessibilityLabel("Human")
-                // The negative padding runs each line back across the gap so it starts at the circle.
+                // The negative padding runs each line back across the gap, stopping just short of
+                // the circle as if masked by a ring slightly larger than the icon.
                 AxisArrow(title: "writing", axis: .horizontal)
-                    .padding(.leading, -Self.axisGap)
+                    .padding(.leading, Self.ringGap - Self.axisGap)
                     .frame(width: Self.gridSide)
             }
             GridRow {
                 AxisArrow(title: "ideas", axis: .vertical, emphasized: pendingIdeas != nil)
-                    .padding(.top, -Self.axisGap)
+                    .padding(.top, Self.ringGap - Self.axisGap)
                     .frame(height: Self.gridSide)
                 cells
             }
