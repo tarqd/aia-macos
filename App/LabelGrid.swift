@@ -16,7 +16,7 @@ struct LabelGrid: View {
     /// Space between the axes and the cells.
     private static let axisGap: CGFloat = 7
     /// Clearance between the person circle and where the axis lines begin.
-    private static let ringGap: CGFloat = 6
+    private static let ringGap: CGFloat = 10.5
 
     var body: some View {
         // Chart-style axes: the person icon is the shared human origin, and each arrow points
@@ -29,16 +29,22 @@ struct LabelGrid: View {
                     .fixedSize()
                     .help("Human")
                     .accessibilityLabel("Human")
-                // The negative padding runs each line back across the gap, stopping just short of
-                // the circle as if masked by a ring slightly larger than the icon.
-                AxisArrow(title: "writing", axis: .horizontal)
+                // Each line starts `ringGap` from the circle, as if masked by a ring slightly larger
+                // than the icon. Titles are centered on the cells, not the (shorter) line.
+                AxisArrow(axis: .horizontal)
                     .padding(.leading, Self.ringGap - Self.axisGap)
                     .frame(width: Self.gridSide)
+                    .overlay { AxisTitle(text: "writing").offset(y: -8) }
             }
             GridRow {
-                AxisArrow(title: "ideas", axis: .vertical, emphasized: pendingIdeas != nil)
+                AxisArrow(axis: .vertical)
                     .padding(.top, Self.ringGap - Self.axisGap)
                     .frame(height: Self.gridSide)
+                    .overlay {
+                        AxisTitle(text: "ideas", emphasized: pendingIdeas != nil)
+                            .rotationEffect(.degrees(-90))
+                            .offset(x: -8)
+                    }
                 cells
             }
         }
@@ -68,12 +74,9 @@ struct LabelGrid: View {
     }
 }
 
-/// A continuous axis line with an arrowhead pointing toward more AI, named like a chart axis:
-/// above the line when horizontal, rotated alongside it when vertical.
+/// A continuous axis line with an arrowhead pointing toward more AI.
 private struct AxisArrow: View {
-    let title: String
     let axis: Axis
-    var emphasized = false
 
     var body: some View {
         let layout = axis == .horizontal ? AnyLayout(HStackLayout(spacing: 0)) : AnyLayout(VStackLayout(spacing: 0))
@@ -86,17 +89,19 @@ private struct AxisArrow: View {
                 .foregroundStyle(.tertiary)
                 .padding(axis == .horizontal ? .leading : .top, -2)
         }
-        .overlay {
-            let text = Text(title)
-                .font(.caption2)
-                .foregroundStyle(emphasized ? .secondary : .tertiary)
-                .fixedSize()
-            if axis == .horizontal {
-                text.offset(y: -8)
-            } else {
-                text.rotationEffect(.degrees(-90)).offset(x: -8)
-            }
-        }
+    }
+}
+
+/// An axis name, set beside its line like a chart axis title.
+private struct AxisTitle: View {
+    let text: String
+    var emphasized = false
+
+    var body: some View {
+        Text(text)
+            .font(.caption2)
+            .foregroundStyle(emphasized ? .secondary : .tertiary)
+            .fixedSize()
     }
 }
 
