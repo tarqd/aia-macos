@@ -82,7 +82,7 @@ struct QuickPickerView: View {
         let label = model.spec.label(code: highlighted) ?? model.selectedLabel
 
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center, spacing: 20) {
+            HStack(alignment: .center, spacing: 28) {
                 LabelGrid(spec: model.spec, selectedCode: highlighted, pendingIdeas: pendingIdeas) {
                     commit($0, as: .link)
                 }

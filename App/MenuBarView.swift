@@ -20,7 +20,7 @@ struct MenuBarView: View {
         let preview = hoveredCode.flatMap(model.spec.label(code:)) ?? label
 
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .center, spacing: 20) {
+            HStack(alignment: .center, spacing: 28) {
                 LabelGrid(spec: model.spec, selectedCode: model.selectedCode,
                           onHover: { hoveredCode = $0?.code }) { model.selectedCode = $0.code }
 

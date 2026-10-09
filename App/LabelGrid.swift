@@ -16,8 +16,11 @@ struct LabelGrid: View {
             GridRow {
                 Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
                 ForEach(1...3, id: \.self) { words in
-                    axisLabel(spec.axes.words[words - 1], position: words)
-                        // Headers may be wider than a cell; don't let them stretch the columns.
+                    // Headers are wider than a cell: overlay them so they overhang
+                    // without stretching the column.
+                    Color.clear
+                        .frame(height: 14)
+                        .overlay { axisLabel(spec.axes.words[words - 1], position: words) }
                         .gridCellUnsizedAxes(.horizontal)
                 }
             }
@@ -43,15 +46,14 @@ struct LabelGrid: View {
         .onHover { if !$0 { onHover?(nil) } }
     }
 
-    /// "Mostly AI ideas" → "Mostly AI\nideas", so headers wrap evenly. The middle ("Some AI")
-    /// header is implied by its position, so it only appears while that row is being picked.
+    /// The middle ("Some AI") header is implied by its position, so it only appears while that
+    /// row is being picked.
     private func axisLabel(_ text: String, position: Int, emphasized: Bool = false) -> some View {
-        let parts = text.split(separator: " ")
-        return Text("\(parts.dropLast().joined(separator: " "))\n\(parts.last ?? "")")
+        Text(text)
             .font(.caption2)
             .foregroundStyle(emphasized ? .primary : .secondary)
             .fontWeight(emphasized ? .semibold : .regular)
-            .lineLimit(2)
+            .lineLimit(1)
             .fixedSize()
             .opacity(position == 2 && !emphasized ? 0 : 1)
     }
